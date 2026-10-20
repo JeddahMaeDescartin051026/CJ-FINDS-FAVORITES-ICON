@@ -116,7 +116,6 @@
 
   <!-- Must load before the script below. Refreshing this page empties the bag, like the shop pages. -->
   <script src="bag-reset.js"></script>
-  <script type="module" src="order-save.js"></script>
   <script>
     (function () {
       "use strict";
@@ -216,36 +215,24 @@
         submitBtn.disabled = true;
         submitBtn.textContent = "Sending…";
 
-        // 1) Save the order to CJ Orders (Firestore)   2) Email copy through Web3Forms
-        var saveToOrders = (window.CJSaveOrder && !payload.botcheck)
-          ? window.CJSaveOrder({
-              name: payload.name,
-              phone: payload.phone,
-              social: payload.social_media,
-              address: payload.address,
-              items: cart.map(function (i) { return { name: i.name, price: i.price, quantity: i.quantity }; }),
-              total: total
-            }).then(function () { return true; }).catch(function () { return false; })
-          : Promise.resolve(false);
-
-        var sendEmail = fetch("https://api.web3forms.com/submit", {
+        fetch("https://api.web3forms.com/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "application/json" },
           body: JSON.stringify(payload)
         })
-          .then(function (res) { return res.json().then(function (data) { return res.ok && data.success; }); })
-          .catch(function () { return false; });
-
-        // The order counts as sent if at least one of the two worked
-        Promise.all([saveToOrders, sendEmail]).then(function (results) {
-          if (results[0] || results[1]) {
-            showSuccess();
-          } else {
+          .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+          .then(function (result) {
+            if (result.ok && result.data.success) {
+              showSuccess();
+            } else {
+              throw new Error(result.data && result.data.message ? result.data.message : "Request failed");
+            }
+          })
+          .catch(function () {
             showError("We couldn't send your details. Check your connection and try again.");
             submitBtn.disabled = false;
             submitBtn.textContent = "Send order request";
-          }
-        });
+          });
       });
 
       renderSummary();

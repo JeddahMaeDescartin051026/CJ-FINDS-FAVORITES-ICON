@@ -23,6 +23,9 @@
 .fav-empty h2 { margin: 10px 0 8px; font-size: 30px; }
 .fav-empty > p:not(.fav-empty-heart) { margin: 0 0 22px; font-size: 14px; color: var(--muted); }
 
+.fav-remove { display: block; width: 100%; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--sage-dark); font-size: 11px; cursor: pointer; transition: background .2s; }
+.fav-remove:hover { background: var(--mint-deep); }
+
 @media (max-width: 600px) {
   .fav-page { padding: 0 14px 45px; }
   .fav-wrap { padding: 22px 14px; border-radius: 20px; }
@@ -30,6 +33,7 @@
   .fav-toolbar { flex-direction: column; align-items: stretch; }
   .fav-actions .fav-btn { flex: 1 1 100%; }
   .fav-add { padding: 10px; font-size: 10px; }
+  .fav-remove { padding: 9px 10px; font-size: 10px; }
 }
 @media (max-width: 370px) {
   .fav-wrap .product-grid { grid-template-columns: 1fr; }
