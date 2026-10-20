@@ -42,7 +42,7 @@
   var PRODUCTS = [
     // ---- Women ----
     { name: "Everyday Knit", note: "Soft-touch essential", price: 299, type: "casual", category: "women", size: "S",
-      front: "knit", back: "", featured: true,
+      front: "knit", back: "", featured: true, sold: true,
       description: "A soft-touch knit that layers over anything. Lightly worn and gently cared for." },
     { name: "Tailored Blazer", note: "Modern relaxed fit", price: 499, type: "formal", category: "women", size: "XL",
       front: "blazer", back: "", featured: true, editorsPick: true,
