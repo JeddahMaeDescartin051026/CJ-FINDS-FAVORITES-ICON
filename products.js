@@ -94,7 +94,7 @@
       front: "fashion", back: "",
       description: "A soft blush-print scarf to wear on your neck, in your hair or on a bag." },
     { name: "Classic Belt", note: "Polished finish", price: 199, type: "formal", category: "accessories", size: "S",
-      front: "tote", back: "",
+      front: "tote", back: "", sold: true,
       description: "A classic belt with a polished buckle that ties any outfit together." },
     { name: "Sport Cap", note: "Adjustable fit", price: 199, type: "sports", category: "accessories", size: "OS",
       front: "men", back: "",
