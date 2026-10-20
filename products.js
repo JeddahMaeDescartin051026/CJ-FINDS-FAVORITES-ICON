@@ -100,7 +100,7 @@
       front: "men", back: "",
       description: "An adjustable sport cap with a curved brim and a comfortable fit." },
       { name: "PITSBURGH STEELERS", note: "BUBBA PATOTIEE ACCESSORIES ", price: 499, type: "CASUAL", category: "accessories", size: "XXL",
-      front: "", back: "",
+      front: "HOMEPAGE_IMAGES/PITSBURGH_FRONT.webp", back: "HOMEPAGE_IMAGES/PITSBURGH_FRONT.webp",
       description: "An adjustable sport cap with a curved brim and a comfortable fit." }
   ];
   /* ================================================== */
