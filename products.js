@@ -98,6 +98,9 @@
       description: "A classic belt with a polished buckle that ties any outfit together." },
     { name: "Sport Cap", note: "Adjustable fit", price: 199, type: "sports", category: "accessories", size: "OS",
       front: "men", back: "",
+      description: "An adjustable sport cap with a curved brim and a comfortable fit." },
+      { name: "PITSBURGH STEELERS", note: "BUBBA PATOTIEE ACCESSORIES ", price: 499, type: "CASUAL", category: "accessories", size: "XXL",
+      front: "", back: "",
       description: "An adjustable sport cap with a curved brim and a comfortable fit." }
   ];
   /* ================================================== */
