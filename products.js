@@ -93,14 +93,11 @@
     { name: "Silk Scarf", note: "Soft blush print", price: 199, type: "casual", category: "accessories", size: "OS",
       front: "fashion", back: "",
       description: "A soft blush-print scarf to wear on your neck, in your hair or on a bag." },
-    { name: "Classic Belt", note: "Polished finish", price: 199, type: "formal", category: "accessories", size: "S",
-      front: "tote", back: "", sold: true,
-      description: "A classic belt with a polished buckle that ties any outfit together." },
+    // { name: "Classic Belt", note: "Polished finish", price: 199, type: "formal", category: "accessories", size: "S",
+     // front: "tote", back: "", sold: true,//
+    //  description: "A classic belt with a polished buckle that ties any outfit together." }, //
     { name: "Sport Cap", note: "Adjustable fit", price: 199, type: "sports", category: "accessories", size: "OS",
       front: "men", back: "",
-      description: "An adjustable sport cap with a curved brim and a comfortable fit." },
-      { name: "PITSBURGH STEELERS", note: "BUBBA PATOTIEE ACCESSORIES ", price: 499, type: "CASUAL", category: "accessories", size: "XXL",
-      front: "HOMEPAGE_IMAGES/PITSBURGH_FRONT.webp", back: "HOMEPAGE_IMAGES/PITSBURGH_FRONT.webp",
       description: "An adjustable sport cap with a curved brim and a comfortable fit." }
   ];
   /* ================================================== */
