@@ -118,6 +118,7 @@
   <!-- Must load before the script below. Refreshing this page empties the bag, like the shop pages. -->
   <script src="bag-reset.js"></script>
   <script type="module" src="order-save.js"></script>
+  <script type="module" src="checkout-gate.js"></script>
   <script>
     (function () {
       "use strict";
@@ -219,8 +220,9 @@
         window.sending = true;
         var truck = window.CJDeliveryButton.drive(submitBtn);
 
-        // 1) Save the order to CJ Orders (Firestore)   2) Email copy through Web3Forms
-        var saveToOrders = (window.CJSaveOrder && !payload.botcheck)
+        // 1) Save the order to CJ Orders (Firestore). Only verified customers can do this.
+        // 2) Only after it is saved, send the email copy through Web3Forms.
+        var saved = (window.CJSaveOrder && !payload.botcheck)
           ? window.CJSaveOrder({
               name: payload.name,
               phone: payload.phone,
@@ -228,28 +230,39 @@
               address: payload.address,
               items: cart.map(function (i) { return { name: i.name, price: i.price, quantity: i.quantity }; }),
               total: total
-            }).then(function () { return true; }).catch(function (err) { console.error("CJ Orders: could not save the order", err); return false; })
-          : Promise.resolve(false);
+            }).then(function () { return { ok: true }; })
+              .catch(function (err) { console.error("CJ Orders: could not save the order", err); return { ok: false, err: err }; })
+          : Promise.resolve({ ok: false });
 
-        var sendEmail = fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(function (res) { return res.json().then(function (data) { return res.ok && data.success; }); })
-          .catch(function () { return false; });
+        var done = saved.then(function (r) {
+          if (!r.ok) return r;
+          return fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify(payload)
+          })
+            .then(function (res) { return res.json(); })
+            .catch(function () {})            // the email copy is a bonus; the saved order is what counts
+            .then(function () { return r; });
+        });
 
-        // The order counts as sent if at least one of the two worked
-        // (it also waits for the truck to finish its drive)
-        Promise.all([saveToOrders, sendEmail, truck]).then(function (results) {
-          if (results[0] || results[1]) {
+        // Wait for the truck to finish its drive too
+        Promise.all([done, truck]).then(function (results) {
+          var r = results[0];
+          if (r.ok) {
             showSuccess();
             // truck drives off to the right while "Order request sent" slides in from the left
             window.CJDeliveryButton.finish(submitBtn, document.getElementById("success"));
           } else {
             window.CJDeliveryButton.reset(submitBtn);
             window.sending = false;
-            showError("We couldn't send your details. Check your connection and try again.");
+            var text = r.err ? String(r.err.code || r.err.message || "") : "";
+            if (/verify|permission|insufficient|unauth/i.test(text)) {
+              errorBox.innerHTML = 'Please <a href="account.html?next=checkout.html" style="text-decoration:underline">log in and verify your email</a> to place an order.';
+              errorBox.hidden = false;
+            } else {
+              showError("We couldn't send your details. Check your connection and try again.");
+            }
           }
         });
       });
@@ -261,6 +274,5 @@
   <script src="chat-faq.js" defer></script>
   <script src="chatbot.js" defer></script>
   <script src="delivery-btn.js"></script>
-  <script src="checkout-continue.js" defer></script>
 </body>
 </html>
