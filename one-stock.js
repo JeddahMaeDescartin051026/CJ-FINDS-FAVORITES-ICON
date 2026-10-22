@@ -12,7 +12,7 @@
   var CART_KEY = "cjfinds-cart";                    // same bag shop.js, script.js and product.js use
   var ADD_SELECTOR = ".add-product, .detail-add, .buy-button"; // ADD TO BAG buttons (cards, Editor's Pick, product page)
   var BLOCK_PLUS_IN_BAG = true;                     // also block the + button in the bag (it would add a 2nd piece)
-  var MESSAGE = "We only have one in stock, try checking another product.";
+  var MESSAGE = "Item already in your bag.";
   /* --------------------------------------------- */
 
   var style = document.createElement("style");
