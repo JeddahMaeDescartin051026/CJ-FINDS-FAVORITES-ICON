@@ -1,21 +1,44 @@
-// Saves each order request to Firestore so it shows up in CJ Orders.
-// Adds window.CJSaveOrder(order); checkout.html calls it next to Web3Forms.
-// Only customers with a verified email can save an order (also enforced by firestore.rules).
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { app, auth } from "./auth.js";
 
-try {
-  var db = getFirestore(app);
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  import { app, auth } from "./auth.js";
+
+  const db = getFirestore(app);
+
   window.CJSaveOrder = async function (order) {
     await auth.authStateReady();
-    var user = auth.currentUser;
-    if (!user || !user.emailVerified) {
-      throw new Error("Please log in and verify your email before ordering.");
-    }
-    // Make sure the token carries the verified flag (it can lag right after verifying)
-    var token = await user.getIdTokenResult();
-    if (!token.claims.email_verified) await user.getIdToken(true);
 
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error("Please log in before ordering.");
+    }
+
+    // Refresh the user's profile from Firebase.
+    await user.reload();
+
+    // Check the latest email verification status.
+    if (!user.emailVerified) {
+      throw new Error(
+        "Your email is not verified yet. Please verify your email before ordering."
+      );
+    }
+
+    // Refresh the ID token so Firestore receives the latest claims.
+    const token = await user.getIdTokenResult(true);
+
+    if (token.claims.email_verified !== true) {
+      throw new Error(
+        "Your verification status has not updated yet. Please sign out, log in again, and retry your order."
+      );
+    }
+
+    // Save the order only after verification succeeds.
     return addDoc(collection(db, "orders"), {
       uid: user.uid,
       email: user.email,
@@ -30,6 +53,3 @@ try {
       createdAt: serverTimestamp()
     });
   };
-} catch (e) {
-  console.error("CJ Orders connection is not set up yet.", e);
-}
