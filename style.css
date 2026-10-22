@@ -59,7 +59,7 @@ h1, h2, .category-copy strong { font-family: "Playfair Display", Georgia, serif;
 h1 { margin: 0; font-size: clamp(58px,8.5vw,116px); line-height: .91; letter-spacing: -.045em; color: var(--sage-dark); }
 .hero-description { margin: 24px 0 30px; font-size: clamp(15px,2vw,24px); line-height: 1.55; color: #805b65; }
 .primary-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 26px; min-height: 54px; padding: 0 25px; border: 0; border-radius: 9px; background: var(--sage-dark); color: #fffefa; font-size: 14px; cursor: pointer; transition: background .2s, transform .2s; }
-.primary-button:hover, .checkout-button:hover:not(:disabled) { background: #5d293e; transform: translateY(-1px); }
+.primary-button:hover { background: #5d293e; transform: translateY(-1px); }
 .primary-button span { font-size: 22px; line-height: 1; }
 .hero-pagination { display: flex; align-items: center; gap: 17px; margin-top: clamp(42px,6vw,76px); }
 .hero-pagination button { padding: 0; border: 0; background: transparent; color: rgba(255,254,250,.75); font-family: "Playfair Display", serif; font-size: 20px; cursor: pointer; }
@@ -163,7 +163,7 @@ h1 { margin: 0; font-size: clamp(58px,8.5vw,116px); line-height: .91; letter-spa
 .cart-summary strong { color: var(--ink); font-weight: 500; text-align: right; }
 .cart-summary div:last-child { padding-top: 13px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink); }
 .cart-summary div:last-child strong { font-weight: 700; }
-.checkout-button { width: 100%; padding: 15px 10px; border: 0; border-radius: 999px; color: white; background: var(--sage); font-size: 12px; cursor: pointer; transition: .2s; }
+.checkout-button { width: 100%; padding: 15px 10px; border: 0; border-radius: 999px; color: white; background: #5d293e; font-size: 12px; cursor: pointer; }
 .checkout-button:disabled { opacity: .55; cursor: not-allowed; }
 .secure-note { margin: 13px 0 0; text-align: center; color: var(--muted); font-size: 10px; }
 .site-footer { padding: 40px 22px; text-align: center; background: #eedbd6; }
