@@ -131,6 +131,56 @@
       var submitBtn = document.getElementById("submit-btn");
       var errorBox = document.getElementById("form-error");
       var summaryItems = document.getElementById("summary-items");
+      
+      
+      // Mobile-friendly two-tap submission:
+      // First tap dismisses the keyboard; second tap submits.
+      var submitArmed = false;
+
+      function isEditableField(el) {
+        return !!(
+          el &&
+          el.matches &&
+          el.matches(
+            'textarea, input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"])'
+          )
+        );
+      }
+
+      document.addEventListener("click", function (e) {
+        var hit = e.target && e.target.closest
+          ? e.target.closest("#submit-btn")
+          : null;
+
+        if (!hit || hit.disabled) return;
+
+        // Second tap: allow the existing checkout code to run.
+        if (submitArmed) {
+          submitArmed = false;
+          return;
+        }
+
+        // First tap: do not submit or start the truck animation.
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        submitArmed = true;
+
+        // Hide the mobile keyboard if a form field is focused.
+        var active = document.activeElement;
+        if (isEditableField(active)) {
+          active.blur();
+        }
+      }, true);
+
+      // If the customer changes any details, require the two taps again.
+      form.addEventListener("input", function () {
+        submitArmed = false;
+      });
+
+      form.addEventListener("change", function () {
+        submitArmed = false;
+      });
 
       var money = function (v) {
         return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 }).format(v);
@@ -253,17 +303,39 @@
             showSuccess();
             // truck drives off to the right while "Order request sent" slides in from the left
             window.CJDeliveryButton.finish(submitBtn, document.getElementById("success"));
-          } else {
-            window.CJDeliveryButton.reset(submitBtn);
-            window.sending = false;
-            var text = r.err ? String(r.err.code || r.err.message || "") : "";
-            if (/verify|permission|insufficient|unauth/i.test(text)) {
-              errorBox.innerHTML = 'Please <a href="account.html?next=checkout.html" style="text-decoration:underline">log in and verify your email</a> to place an order.';
-              errorBox.hidden = false;
-            } else {
-              showError("We couldn't send your details. Check your connection and try again.");
-            }
-          }
+          
+} else {
+  window.CJDeliveryButton.reset(submitBtn);
+  window.sending = false;
+
+  // Keep the actual error visible in the browser console.
+  console.error("CJ Finds order submission failed:", r.err);
+
+  var code = r.err && r.err.code ? r.err.code : "";
+  var message = r.err && r.err.message ? r.err.message : "";
+
+  if (code === "permission-denied") {
+    showError(
+      "Your order could not be saved because Firestore rejected the request. " +
+      "This does not necessarily mean your email is unverified. Please try again or contact support."
+    );
+  } else if (
+    message.toLowerCase().includes("not verified") ||
+    message.toLowerCase().includes("verify your email")
+  ) {
+    errorBox.innerHTML =
+      'Please <a href="account.html?next=checkout.html" ' +
+      'style="text-decoration:underline">verify your email</a> before ordering.';
+    errorBox.hidden = false;
+  } else if (code === "unauthenticated") {
+    showError("Your session may have expired. Please log in again.");
+  } else {
+    showError(
+      "We couldn't save your order. Please try again. If the problem continues, contact support."
+    );
+  }
+}
+
         });
       });
 
