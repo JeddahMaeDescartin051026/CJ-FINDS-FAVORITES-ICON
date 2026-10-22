@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="delivery-btn.css">
   <style>
     .back-link { justify-self: start; width: fit-content; padding-bottom: 4px; border-bottom: 1px solid var(--sage); font-size: 12px; }
     .checkout { max-width: 1100px; margin: 0 auto; padding: 12px clamp(18px, 5vw, 56px) 70px; }
@@ -91,7 +92,7 @@
             <!-- spam trap: real customers never see or tick this -->
             <input class="hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-            <button class="primary-button submit" id="submit-btn" type="submit">Send order request</button>
+            <button class="primary-button submit delivery-btn" id="submit-btn" type="submit">Send Order Request</button>
             <p class="form-error" id="form-error" role="alert" hidden></p>
           </form>
         </section>
@@ -213,8 +214,10 @@
         }).join("\n");
         payload.order_total = money(total);
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Sending…";
+        // Button zooms to fill the screen, then the pink truck drives across
+        if (window.sending) return;
+        window.sending = true;
+        var truck = window.CJDeliveryButton.drive(submitBtn);
 
         // 1) Save the order to CJ Orders (Firestore)   2) Email copy through Web3Forms
         var saveToOrders = (window.CJSaveOrder && !payload.botcheck)
@@ -237,13 +240,16 @@
           .catch(function () { return false; });
 
         // The order counts as sent if at least one of the two worked
-        Promise.all([saveToOrders, sendEmail]).then(function (results) {
+        // (it also waits for the truck to finish its drive)
+        Promise.all([saveToOrders, sendEmail, truck]).then(function (results) {
           if (results[0] || results[1]) {
             showSuccess();
+            // truck drives off to the right while "Order request sent" slides in from the left
+            window.CJDeliveryButton.finish(submitBtn, document.getElementById("success"));
           } else {
+            window.CJDeliveryButton.reset(submitBtn);
+            window.sending = false;
             showError("We couldn't send your details. Check your connection and try again.");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Send order request";
           }
         });
       });
@@ -254,5 +260,6 @@
   <script src="products.js" defer></script>
   <script src="chat-faq.js" defer></script>
   <script src="chatbot.js" defer></script>
+  <script src="delivery-btn.js"></script>
 </body>
 </html>
