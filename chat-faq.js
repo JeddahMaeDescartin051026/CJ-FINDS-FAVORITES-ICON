@@ -39,15 +39,16 @@
 
     greeting: "Hi! I'm the CJ Finds assistant. 💗\nAsk me about our pre-loved finds, prices, sizes, payment, or how to order.",
 
-    fallback: "That seems to be an irrelevant question. Please ask me again.",
+    fallback: "That seems to be an irrelevant question or there might be some typos. Please ask me again.",
 
     /* Quick-reply buttons shown when the chat opens, after the fallback message, and when the customer taps "Menu" */
     suggestions: [
       "What payment methods do you accept?",
+      "How does your shipping work?",
       "Show me items under ₱300.",
       "What sizes do you have?",
-      "How do I order?",
-      "How can I sell my clothes?"
+      "Can I have my pre-loved items sold on your website?",
+      "How do I order?"
     ],
 
     /* ================= QUESTIONS & ANSWERS ================= */
@@ -57,6 +58,15 @@
       { keywords: ["hi", "hello", "hey", "hola", "kumusta", "good morning", "good afternoon", "good evening", "yo"],
         answer: function (H) { return H.cfg.greeting; } },
 
+      { keywords: ["Where are you from", "where"],
+        answer: "We are from Cebu City. We could work with and become our sellers!" },
+       
+      { keywords: ["How does your shipping work?"],
+        answer: "We use LALAMOVE or MAXIM for our deliveries, that's why it is very important to indicate your address." },
+
+      { keywords: ["Can I have my pre-loved items sold on your website?"],
+        answer: "If you are interested in renting a space in our website, please contact us directly on Facebook: JM Descartin or Christian Tumulak. We look forward to do business with you!"},
+
       { keywords: ["thank you", "thanks", "thank u", "salamat", "ty", "much appreciated"],
         answer: "You're welcome! 💗 Anything else I can help you find?" },
 
@@ -65,6 +75,10 @@
 
       { keywords: ["who are you", "what can you do", "help", "assist", "your name", "can you help", "need help"],
         answer: "I'm the CJ Finds assistant! I can help with:\n• Our products, prices, and sizes\n• Payment, shipping, and returns\n• How to order\n• Selling your pre-loved items\n\nJust type your question.",
+        chips: true },
+
+      { keywords: ["who created you", "who is your CEO", "master", "designer", "web developer", "create", "founder", "owner", "admin", "contact", "boss", "manage"],
+        answer: "I'm the CJ Finds assistant! I was founded by the hardwork of Christian and Jeddah. They have poured their dedication in making CJ FINDS possible.",
         chips: true },
 
       { keywords: ["are you a bot", "are you a robot", "are you ai", "are you human", "real person", "talk to human", "talk to a person", "talk to someone", "customer service", "customer support", "live agent"],
@@ -105,7 +119,7 @@
       /* ---------- Ordering ---------- */
       { keywords: ["how to order", "how do i order", "how can i order", "how to buy", "how do i buy", "how to purchase", "place order", "place an order", "i want to order", "checkout", "check out", "ordering process"],
         priority: true,
-        answer: "Ordering is easy:\n1. Browse [Women](women.html), [Men](men.html), or [Accessories](accessories.html).\n2. Tap **Add to bag** on the pieces you love.\n3. Open your bag with the bag button on the bottom left.\n4. Go to checkout and fill in your name, phone number, social media account, and delivery address.\n5. Submit your order and pay through QR. Our team will chat you via Messenger or Instagram for further information, so please check your message request." },
+        answer: "Ordering is easy. Here's how:\n1. Browse [Women](women.html), [Men](men.html), or [Accessories](accessories.html).\n2. Tap **Add to bag** on the pieces you love.\n3. Open your bag with the bag button on the bottom left.\n4. Go to checkout and fill in your name, phone number, social media account, and delivery address.\n5. Submit your order and pay through QR. Our team will chat you via Messenger or Instagram for further information, so please check your message request." },
 
       { keywords: ["add to bag", "add to cart", "cart", "shopping bag", "shopping cart", "my bag", "my cart", "remove item", "remove from bag", "empty bag", "bag is empty", "view bag", "open bag", "see my bag"],
         priority: true,
