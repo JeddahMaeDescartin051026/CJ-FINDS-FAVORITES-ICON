@@ -63,7 +63,7 @@
       $("#product-root").innerHTML =
         '<div class="product-gallery">' +
           '<figure class="view"><div class="view-frame" role="button" tabindex="0" data-view="0" aria-label="Open front view of ' + esc(p.name) + ' full screen"><div class="view-photo" role="img" aria-label="Front view of ' + esc(p.name) + '" style="background-image:url(\'' + esc(p.front) + '\')"></div><span class="zoom-hint" aria-hidden="true">⤢</span>' + (p.sold ? '<span class="sold-badge">SOLD</span>' : '') + '</div><figcaption>Front view</figcaption></figure>' +
-          '<figure class="view"><div class="view-frame" role="button" tabindex="0" data-view="1" aria-label="Open back view of ' + esc(p.name) + ' full screen"><div class="view-photo' + backClass + '" role="img" aria-label="Back view of ' + esc(p.name) + '" style="background-image:url(\'' + esc(backImage) + '\')"></div><span class="zoom-hint" aria-hidden="true">⤢</span></div><figcaption>Back view</figcaption></figure>' +
+          '<figure class="view"><div class="view-frame" role="button" tabindex="0" data-view="1" aria-label="Open back view of ' + esc(p.name) + ' full screen"><div class="view-photo' + backClass + '" role="img" aria-label="Back view of ' + esc(p.name) + '" style="background-image:url(\'' + esc(backImage) + '\')"></div><span class="zoom-hint" aria-hidden="true">⤢</span>' + (p.sold ? '<span class="sold-badge">SOLD</span>' : '') + '</div><figcaption>Back view</figcaption></figure>' +
         "</div>" +
         '<div class="product-summary">' +
           '<p class="eyebrow">' + esc(category) + " · " + esc(p.type) + "</p>" +
