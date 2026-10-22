@@ -1,166 +1,69 @@
-/* CJ Finds - account page: create account, log in, verify email. */
+// auth.js - Firebase Auth (Email/Password only) shared by every page.
+// Uses the SAME Firebase SDK version as order-save.js and shares one app,
+// so Firestore automatically sends the signed-in user's token with each order.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-    auth, signUp, logIn, logOut, resendVerification,
-    checkVerified, resetPassword, watchAuth, authMessage
-  } from "./auth.js";
-  
-  var $ = function (s) { return document.querySelector(s); };
-  
-  /* Where to go after verifying (only plain page names, never other websites) */
-  var params = new URLSearchParams(location.search);
-  var rawNext = params.get("next") || "";
-  var NEXT = /^[a-z0-9_-]+\.html(#[\w-]+)?$/i.test(rawNext) ? rawNext : "index.html";
-  var cameFromCheckout = params.has("next");
-  
-  var mode = "signup";
-  var cooldownTimer = null;
-  var redirecting = false;
-  
-  function say(text, kind) {
-    var m = $("#msg");
-    m.textContent = text || "";
-    m.className = "auth-message" + (kind ? " is-" + kind : "");
-  }
-  
-  function showPanel(name) {
-    ["form", "verify", "done"].forEach(function (p) { $("#panel-" + p).hidden = p !== name; });
-  }
-  
-  function setMode(next) {
-    mode = next;
-    document.querySelectorAll(".auth-tab").forEach(function (t) {
-      t.classList.toggle("active", t.dataset.mode === mode);
-    });
-    var signup = mode === "signup";
-    $("#form-title").textContent = signup ? "Create your account" : "Welcome back";
-    $("#form-lead").textContent = signup
-      ? "Verify your email once, then shop and order with us."
-      : "Log in to continue to checkout.";
-    $("#submit").textContent = signup ? "Create account" : "Log in";
-    $("#password").autocomplete = signup ? "new-password" : "current-password";
-    $("#forgot").hidden = signup;
-    say("");
-  }
-  
-  /* Decide which panel to show for the current user */
-  function render(user) {
-    if (!user) { showPanel("form"); return; }
-    if (user.emailVerified) {
-      $("#done-email").textContent = user.email;
-      $("#btn-continue").href = NEXT;
-      $("#btn-continue").textContent = cameFromCheckout ? "Continue to checkout" : "Continue shopping";
-      showPanel("done");
-      if (cameFromCheckout && !redirecting) {
-        redirecting = true;
-        setTimeout(function () { location.href = NEXT; }, 900);
-      }
-    } else {
-      $("#verify-email").textContent = user.email;
-      showPanel("verify");
-    }
-  }
-  
-  /* ---------- Form ---------- */
-  document.querySelectorAll(".auth-tab").forEach(function (t) {
-    t.addEventListener("click", function () { setMode(t.dataset.mode); });
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+
+// Refresh the user and, once verified, refresh the token too so
+// Firestore rules see email_verified = true right away.
+export async function checkVerified() {
+  const user = auth.currentUser;
+  if (!user) return false;
+  await user.reload();
+  if (user.emailVerified) await user.getIdToken(true);
+  return user.emailVerified;
+}
+
+export async function signUp(email, password) {
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  await sendEmailVerification(cred.user);
+  return cred.user;
+}
+
+export async function logIn(email, password) {
+  const cred = await signInWithEmailAndPassword(auth, email, password);
+  await checkVerified();
+  return cred.user;
+}
+
+export function resendVerification() {
+  if (!auth.currentUser) throw new Error("Please log in first.");
+  return sendEmailVerification(auth.currentUser);
+}
+
+export function resetPassword(email) { return sendPasswordResetEmail(auth, email); }
+export function logOut() { return signOut(auth); }
+
+// callback receives { user, canShop }
+export function watchAuth(callback) {
+  return onAuthStateChanged(auth, (user) => {
+    callback({ user, canShop: !!(user && user.emailVerified) });
   });
-  
-  $("#auth-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    var email = $("#email").value.trim();
-    var password = $("#password").value;
-    if (!email || !password) { say("Please fill in your email and password.", "error"); return; }
-  
-    var btn = $("#submit");
-    btn.disabled = true;
-    say(mode === "signup" ? "Creating your account…" : "Logging you in…");
-    try {
-      if (mode === "signup") {
-        await signUp(email, password);
-        say("Account created! We sent you a verification email.", "ok");
-        startCooldown();
-      } else {
-        await logIn(email, password);
-        say("");
-      }
-      render(auth.currentUser);
-    } catch (err) {
-      say(authMessage(err), "error");
-    } finally {
-      btn.disabled = false;
-    }
-  });
-  
-  $("#forgot").addEventListener("click", async function () {
-    var email = $("#email").value.trim();
-    if (!email) { say("Type your email above first, then tap “Forgot your password?”.", "error"); return; }
-    try {
-      await resetPassword(email);
-      say("If that email has an account, a reset link is on its way.", "ok");
-    } catch (err) {
-      say(authMessage(err), "error");
-    }
-  });
-  
-  /* ---------- Verify panel ---------- */
-  async function confirmVerified(quiet) {
-    try {
-      var ok = await checkVerified();
-      if (ok) { say("Email verified. Thank you!", "ok"); render(auth.currentUser); }
-      else if (!quiet) say("Not verified yet. Open the link in your email, then try again.", "error");
-    } catch (err) {
-      if (!quiet) say(authMessage(err), "error");
-    }
-  }
-  $("#btn-verified").addEventListener("click", function () { confirmVerified(false); });
-  
-  function startCooldown() {
-    var btn = $("#btn-resend");
-    var left = 60;
-    clearInterval(cooldownTimer);
-    btn.disabled = true;
-    btn.textContent = "Resend email (" + left + "s)";
-    cooldownTimer = setInterval(function () {
-      left -= 1;
-      if (left <= 0) {
-        clearInterval(cooldownTimer);
-        btn.disabled = false;
-        btn.textContent = "Resend email";
-      } else {
-        btn.textContent = "Resend email (" + left + "s)";
-      }
-    }, 1000);
-  }
-  $("#btn-resend").addEventListener("click", async function () {
-    try {
-      await resendVerification();
-      say("Verification email sent again. Check your inbox and spam folder.", "ok");
-      startCooldown();
-    } catch (err) {
-      say(authMessage(err), "error");
-    }
-  });
-  
-  $("#btn-switch").addEventListener("click", async function () { await logOut(); say(""); setMode("signup"); });
-  $("#btn-logout").addEventListener("click", async function () { await logOut(); redirecting = true; say("You’re logged out."); setMode("login"); });
-  
-  /* When the customer comes back from their email app/tab, check automatically */
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "visible" && auth.currentUser && !auth.currentUser.emailVerified) {
-      confirmVerified(true);
-    }
-  });
-  
-  /* ---------- Header menu + footer year ---------- */
-  var menuBtn = document.querySelector(".menu-toggle");
-  if (menuBtn) menuBtn.addEventListener("click", function () {
-    var panel = document.querySelector(".mobile-menu");
-    var open = panel.hidden;
-    panel.hidden = !open;
-    menuBtn.setAttribute("aria-expanded", String(open));
-  });
-  $("#year").textContent = new Date().getFullYear();
-  
-  /* ---------- Start ---------- */
-  setMode("signup");
-  watchAuth(function (s) { render(s.user); });
+}
+
+export function authMessage(err) {
+  const map = {
+    "auth/email-already-in-use": "That email already has an account. Try logging in.",
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/missing-password": "Please enter your password.",
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/invalid-credential": "Wrong email or password.",
+    "auth/user-not-found": "Wrong email or password.",
+    "auth/wrong-password": "Wrong email or password.",
+    "auth/too-many-requests": "Too many attempts. Please wait a bit and try again.",
+    "auth/network-request-failed": "No connection. Please check your internet and try again."
+  };
+  return map[err && err.code] || "Something went wrong. Please try again.";
+}
