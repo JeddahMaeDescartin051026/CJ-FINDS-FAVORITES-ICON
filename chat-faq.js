@@ -62,7 +62,7 @@
         answer: "We are from Cebu City. We could work with and become our sellers!" },
        
       { keywords: ["How does your shipping work?"],
-        answer: "We use LALAMOVE or MAXIM for our deliveries, that's why it is very important to indicate your address." },
+        answer: "Buyer will pay for the shipping. We use J&T as our carrier for our deliveries, that's why it is very important to indicate your address. As much as possible, we will do our best to have low fees for shipping" },
 
       { keywords: ["Can I have my pre-loved items sold on your website?"],
         answer: "If you are interested in renting a space in our website, please contact us directly on Facebook: JM Descartin or Christian Tumulak. We look forward to do business with you!"},
